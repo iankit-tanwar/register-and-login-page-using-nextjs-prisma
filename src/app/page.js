@@ -1,95 +1,186 @@
-import Image from 'next/image'
-import styles from './page.module.css'
+'use client'
+
+import { useState } from "react"
+import Swal from "sweetalert2";
 
 export default function Home() {
+
+
+  const [payload,setPayload]=useState({
+                                          "username":"",
+                                          "email":"",
+                                          "password": "",
+                                          "firstName":"",
+                                          "lastName":"",
+                                          "role":"CUSTOMER"
+                                        
+                                      });
+
+  let handleChange=(e)=>{
+   
+    setPayload({
+      ...payload,
+      [e.target.name]:e.target.value
+    })
+  }
+
+
+  const isValidEmail = (email) => {
+    // Regular expression for a basic email validation
+    const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+    return emailPattern.test(email);
+  };
+
+let submitData= ()=>{
+
+  if (!payload.username || !payload.email || !payload.password) {
+    // Show a SweetAlert error
+    Swal.fire({
+      icon: "error",
+      title: "Validation Error",
+      text: "Please fill in the required fields (Username, Email, Password).",
+    });
+    return; // Stop form submission
+  }
+  
+ // Check if the email is valid
+ if (!isValidEmail(payload.email)) {
+  Swal.fire({
+    icon: "error",
+    title: "Validation Error",
+    text: "Please enter a valid email address.",
+  });
+  return;
+}
+
+  fetch(`/api/register`,{
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      // 'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: JSON.stringify(payload)
+  })
+  .then((res)=>{
+    return res.json()
+  })
+  .then((data) => {
+    console.log(data);
+    if (data.status === 409) {
+      Swal.fire({
+        icon: "error",
+        title: "Validation Error",
+        text: "Email already in use. Please enter a different email address.",
+      });
+      return; // Stop further processing
+    } else if (data.status === 400) {
+      Swal.fire({
+        icon: "error",
+        title: "Validation Error",
+        text: "Username already in use. Please enter a different username.",
+      });
+      return; // Stop further processing
+    } else {
+      // Handle successful response here
+      // You can show a success message or redirect the user to another page
+      Swal.fire({
+        icon: 'success',
+        title: 'Registration Successful',
+        text: 'You have successfully registered!',
+        showCancelButton: false,
+        showConfirmButton: true,
+        allowOutsideClick: false,
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // Reload the page after the user clicks "OK"
+          window.location.reload();
+          
+        }
+      });
+    }
+  })
+  .catch((e)=>{
+    console.log(e)
+  })
+}
+
+
+
   return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.js</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+    <main >
+    <div className="container">
+        <div className="card  mt-5">
+          <h5 className="card-header text-center">Register</h5>
+          <div className="card-body">
+            <form>
+              <div className="mb-3">
+                <label htmlFor="Username" className="form-label">Username</label>
+                <input type="Username" 
+                className="form-control" 
+                id="Username" 
+                aria-describedby="Username" 
+                name="username"
+                onChange={handleChange}
+                
+                />
+               
+              </div>
+              <div className="mb-3">
+                <label htmlFor="exampleInputEmail1" className="form-label">Email address</label>
+                <input type="email" 
+                className="form-control" 
+                id="exampleInputEmail1" 
+                aria-describedby="emailHelp" 
+                name="email"
+                onChange={handleChange}
+                />
+              
+              </div>
+              <div className="mb-3">
+                <label htmlFor="exampleInputPassword1" className="form-label">Password</label>
+                <input type="password" 
+                className="form-control" 
+                id="exampleInputPassword1" 
+                name="password"
+                onChange={handleChange}
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="firstName" className="form-label">First Name</label>
+                <input type="firstName" 
+                className="form-control" 
+                id="firstName" 
+                aria-describedby="firstName" 
+                name="firstName"
+                onChange={handleChange}
+                />
+                
+              </div>
+              <div className="mb-3">
+                <label htmlFor="lastName" className="form-label">Last Name</label>
+                <input type="lastName" 
+                className="form-control" 
+                id="lastName" 
+                aria-describedby="lastName" 
+                name="lastName"
+                onChange={handleChange}
+                />
+             
+              </div>
+              
+             <div className=" d-flex justify-content-center">
+              <button type="button" className="btn btn-primary" onClick={submitData}>Submit</button>
+
+             </div>
+            
+            </form>
+          </div>
         </div>
-      </div>
 
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
+    </div>
+  
 
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
 
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore the Next.js 13 playground.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
     </main>
   )
 }
