@@ -27,7 +27,8 @@ export default function Home() {
 
   const isValidEmail = (email) => {
     // Regular expression for a basic email validation
-    const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+    //const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+    const emailPattern = /^[a-zA-Z0-9._-]+@gmail.com$/;
     return emailPattern.test(email);
   };
 
@@ -94,6 +95,8 @@ let submitData= ()=>{
         if (result.isConfirmed) {
           // Reload the page after the user clicks "OK"
           window.location.reload();
+          
+          window.location.href = '/login';
           
         }
       });
